@@ -100,14 +100,11 @@ class SearchController:
             # open link in a different tab
             # self._driver.implicitly_wait(10)
 
-            # ad_link_element.send_keys(Keys.CONTROL + Keys.RETURN)
+            ad_link_element.send_keys(Keys.CONTROL + Keys.RETURN)
 
             for window_handle in self._driver.window_handles:
                 if window_handle != original_window_handle:
                     self._driver.switch_to.window(window_handle)
-
-                    self._driver.get(ad_link)
-
                     sleep(self._ad_visit_time)
                     self._driver.close()
                     break
