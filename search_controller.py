@@ -37,7 +37,7 @@ class SearchController:
     COOKIE_ACCEPT_BUTTON = (By.TAG_NAME, "button")
     TOP_ADS_CONTAINER = (By.ID, "outer-wrapper")
     BOTTOM_ADS_CONTAINER = (By.ID, "footer-wrapper")
-    AD_RESULTS = (By.CSS_SELECTOR, "ins > a")
+    AD_RESULTS = (By.CSS_SELECTOR, "ins.adsbyadsalo > a")
     AD_TITLE = (By.CSS_SELECTOR, "div[role='heading']")
 
     def __init__(self, driver: selenium.webdriver, query: str, ad_visit_time: int) -> None:
@@ -70,7 +70,8 @@ class SearchController:
 
         try:
             wait = WebDriverWait(self._driver, timeout=10)
-            results_loaded = wait.until(EC.presence_of_element_located(self.RESULTS_CONTAINER))
+            results_loaded = wait.until(
+                EC.presence_of_element_located(self.RESULTS_CONTAINER))
 
             if results_loaded:
                 logger.info("Getting ad links...")
@@ -98,7 +99,6 @@ class SearchController:
             logger.info(f"Clicking to ({ad_link})...")
 
             # open link in a different tab
-            # self._driver.implicitly_wait(10)
 
             ad_link_element.send_keys(Keys.CONTROL + Keys.RETURN)
 
@@ -114,7 +114,8 @@ class SearchController:
             sleep(1)
 
             # scroll the page to avoid elements remain outside of the view
-            self._driver.execute_script("arguments[0].scrollIntoView(true);", ad_link_element)
+            self._driver.execute_script(
+                "arguments[0].scrollIntoView(true);", ad_link_element)
 
     def end_search(self) -> None:
         """Close the browsers"""
@@ -140,29 +141,32 @@ class SearchController:
 
         while not self._is_scroll_at_the_end():
             try:
-                top_ads_containers = self._driver.find_elements(*self.TOP_ADS_CONTAINER)
+                top_ads_containers = self._driver.find_elements(
+                    *self.TOP_ADS_CONTAINER)
                 for ad_container in top_ads_containers:
                     ads.extend(ad_container.find_elements(*self.AD_RESULTS))
 
             except NoSuchElementException:
                 logger.debug("Could not found top ads!")
 
-            try:
-                bottom_ads_containers = self._driver.find_elements(*self.BOTTOM_ADS_CONTAINER)
-                for ad_container in bottom_ads_containers:
-                    ads.extend(ad_container.find_elements(*self.AD_RESULTS))
+            # try:
+            #     bottom_ads_containers = self._driver.find_elements(
+            #         *self.BOTTOM_ADS_CONTAINER)
+            #     for ad_container in bottom_ads_containers:
+            #         ads.extend(ad_container.find_elements(*self.AD_RESULTS))
 
-            except NoSuchElementException:
-                logger.debug("Could not found bottom ads!")
+            # except NoSuchElementException:
+            #     logger.debug("Could not found bottom ads!")
 
-            self._driver.find_element(By.TAG_NAME, "body").send_keys(Keys.PAGE_DOWN)
+            self._driver.find_element(
+                By.TAG_NAME, "body").send_keys(Keys.PAGE_DOWN)
             sleep(1)
 
         if not ads:
             return []
 
         # clean non-ad links and duplicates
-        ads = set([ad_link for ad_link in ads if ad_link.get_attribute("target")])
+        ads = set([ad_link for ad_link in ads if ad_link.get_attribute("href")])
 
         # if there are filter words given, filter results accordingly
         filtered_ads = []
@@ -172,7 +176,7 @@ class SearchController:
             for ad in ads:
 
                 for word in self._filter_words:
-                    if word in ad.get_attribute("target"):
+                    if word in ad.get_attribute("href"):
                         filtered_ads.append(ad)
         else:
             filtered_ads = ads
@@ -194,7 +198,8 @@ class SearchController:
 
         try:
             cookie_dialog = self._driver.find_element(*self.COOKIE_DIALOG)
-            accept_button = cookie_dialog.find_elements(*self.COOKIE_ACCEPT_BUTTON)[-2]
+            accept_button = cookie_dialog.find_elements(
+                *self.COOKIE_ACCEPT_BUTTON)[-2]
             accept_button.click()
             sleep(1)
 
@@ -208,7 +213,8 @@ class SearchController:
         :returns: Whether the scrollbar was reached to end or not
         """
 
-        page_height = self._driver.execute_script("return document.body.scrollHeight;")
+        page_height = self._driver.execute_script(
+            "return document.body.scrollHeight;")
         total_scrolled_height = self._driver.execute_script(
             "return window.pageYOffset + window.innerHeight;"
         )
@@ -236,6 +242,7 @@ class SearchController:
         filter_words = []
 
         if "@" in query:
-            filter_words = [word.strip().lower() for word in query.split("@")[1].split("#")]
+            filter_words = [word.strip().lower()
+                            for word in query.split("@")[1].split("#")]
 
         return (search_query, filter_words)
