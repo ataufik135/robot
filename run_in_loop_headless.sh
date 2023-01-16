@@ -1,6 +1,6 @@
 #!/bin/bash
-cd /robot
-source /robot/env/bin/activate
+cd /bak
+source /bak/env/bin/activate
 wait_time=20
 
 if [[ $# -eq 1 ]]; then
