@@ -59,8 +59,10 @@ def get_random_user_agent_string() -> str:
         OperatingSystem.LINUX.value,
         OperatingSystem.WINDOWS.value,
     ]
-    software_types = [SoftwareType.WEB_BROWSER.value, SoftwareType.APPLICATION.value]
-    popularity = [Popularity.POPULAR.value, Popularity.COMMON.value, Popularity.AVERAGE.value]
+    software_types = [SoftwareType.WEB_BROWSER.value,
+                      SoftwareType.APPLICATION.value]
+    popularity = [Popularity.POPULAR.value,
+                  Popularity.COMMON.value, Popularity.AVERAGE.value]
 
     user_agent_rotator = UserAgent(
         software_names=software_names,
@@ -76,7 +78,8 @@ def get_random_user_agent_string() -> str:
         user_agent_str = item["user_agent"]
 
         if re.search("Chrome\/\s*v*(\d+)", user_agent_str):
-            major_version = int(re.search("Chrome\/\s*v*(\d+)", user_agent_str).group(1))
+            major_version = int(
+                re.search("Chrome\/\s*v*(\d+)", user_agent_str).group(1))
 
             if major_version > 70:
                 selected_versions.append((user_agent_str, major_version))
@@ -113,16 +116,21 @@ def get_installed_chrome_version() -> int:
                     "\\", "\\\\"
                 )
             )
-            chrome_version = subprocess.check_output(version_command, shell=True)
-            major_version = int(chrome_version.decode("utf-8").strip().split(".")[0].split("=")[1])
+            chrome_version = subprocess.check_output(
+                version_command, shell=True)
+            major_version = int(chrome_version.decode(
+                "utf-8").strip().split(".")[0].split("=")[1])
         else:
-            result = subprocess.run(["google-chrome", "--version"], capture_output=True)
-            major_version = int(str(result.stdout).split(" ")[-2].split(".")[0])
+            result = subprocess.run(
+                ["google-chrome", "--version"], capture_output=True)
+            major_version = int(
+                str(result.stdout).split(" ")[-2].split(".")[0])
 
         logger.debug(f"Installed Chrome version: {major_version}")
 
     except subprocess.SubprocessError:
-        logger.error("Failed to get Chrome version! Latest version will be used.")
+        logger.error(
+            "Failed to get Chrome version! Latest version will be used.")
 
     return major_version
 
@@ -179,7 +187,7 @@ def create_webdriver(proxy: str, auth: bool, headless: bool) -> undetected_chrom
     chrome_version = get_installed_chrome_version()
 
     if proxy:
-      
+
         logger.info(f"Using proxy: {proxy}")
 
         if auth:
@@ -195,7 +203,10 @@ def create_webdriver(proxy: str, auth: bool, headless: bool) -> undetected_chrom
             install_plugin(chrome_options, host, port, username, password)
 
         else:
-            chrome_options.add_argument(f"--proxy-server={proxy}")
+            if (proxy == "L") or (proxy == "O"):
+                logger.debug(f"Custom Proxy: {proxy}")
+            else:
+                chrome_options.add_argument(f"--proxy-server={proxy}")
 
         driver = undetected_chromedriver.Chrome(
             version_main=chrome_version,
