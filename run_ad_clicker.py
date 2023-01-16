@@ -22,7 +22,8 @@ def get_arg_parser() -> ArgumentParser:
 
     arg_parser = ArgumentParser()
     arg_parser.add_argument("-q", "--query", help="Search query")
-    arg_parser.add_argument("--headless", action="store_true", help="Use headless browser")
+    arg_parser.add_argument(
+        "--headless", action="store_true", help="Use headless browser")
     arg_parser.add_argument(
         "-p",
         "--proxy",
@@ -83,8 +84,7 @@ def start_tool(browser_id, query, proxy, auth) -> None:
     arg_parser = get_arg_parser()
     args = arg_parser.parse_args()
 
-    # command = f"python {Path('ad_clicker.py').resolve()} -q {query} '-p' {proxy} {'--headless' if args.headless else ''} {'--auth' if args.auth else ''} --id {browser_id}"
-    command = f"python {Path('ad_clicker.py').resolve()} -q {query} {'--headless' if args.headless else ''} {'--auth' if args.auth else ''} --id {browser_id}"
+    command = f"python {Path('ad_clicker.py').resolve()} -q {query} -p {proxy} {'--headless' if args.headless else ''} {'--auth' if args.auth else ''} --id {browser_id}"
     subprocess.run(command, shell=True, check=True)
 
 
@@ -116,14 +116,16 @@ def main():
 
     if args.query_file:
         queries = get_queries(args.query_file)
-        query = cycle(queries) if len(queries) <= MAX_WORKERS else iter(queries)
+        query = cycle(queries) if len(
+            queries) <= MAX_WORKERS else iter(queries)
     else:
         raise SystemExit("Missing query file!")
 
     if args.proxy_file:
         proxies = get_proxies(args.proxy_file)
         random.shuffle(proxies)
-        proxy = cycle(proxies) if len(proxies) <= MAX_WORKERS else iter(proxies)
+        proxy = cycle(proxies) if len(
+            proxies) <= MAX_WORKERS else iter(proxies)
     else:
         raise SystemExit("Missing proxy file!")
 
@@ -132,7 +134,8 @@ def main():
         with ProcessPoolExecutor(max_workers=MAX_WORKERS) as executor:
 
             futures = [
-                executor.submit(start_tool, i, next(query), next(proxy), args.auth)
+                executor.submit(start_tool, i, next(
+                    query), next(proxy), args.auth)
                 for i in range(1, MAX_WORKERS + 1)
             ]
 
@@ -153,7 +156,8 @@ def main():
             with ProcessPoolExecutor(max_workers=MAX_WORKERS) as executor:
 
                 futures = [
-                    executor.submit(start_tool, i, query, next(proxy), args.auth)
+                    executor.submit(start_tool, i, query,
+                                    next(proxy), args.auth)
                     for i in range(1, MAX_WORKERS + 1)
                 ]
 
