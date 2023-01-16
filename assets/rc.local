@@ -10,5 +10,7 @@
 # bits.
 #
 # By default this script does nothing.
- 
+
+sleep 5
+screen -dmS headless /bak/run_in_loop_headless.sh 30 20
 exit 0
