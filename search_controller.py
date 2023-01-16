@@ -43,7 +43,7 @@ class SearchController:
     def __init__(self, driver: selenium.webdriver, query: str, ad_visit_time: int, proxy: str) -> None:
 
         self._driver = driver
-        self._ad_visit_time = 7
+        self._ad_visit_time = 15
         self._search_query, self._filter_words = self._process_query(query)
         self._proxy = proxy
 
