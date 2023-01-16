@@ -29,9 +29,9 @@ class SearchController:
     :param ad_visit_time: Number of seconds to wait on the ad page
     """
 
-    URL = "//"
+    URL = "https://www.croxyproxy.com"
 
-    SEARCH_INPUT = (By.NAME, "q")
+    SEARCH_INPUT = (By.NAME, "url")
     RESULTS_CONTAINER = (By.ID, "pages-wrap")
     COOKIE_DIALOG = (By.CSS_SELECTOR, "div[role='dialog']")
     COOKIE_ACCEPT_BUTTON = (By.TAG_NAME, "button")
@@ -40,11 +40,12 @@ class SearchController:
     AD_RESULTS = (By.CSS_SELECTOR, "ins.adsbyadsalo > a")
     AD_TITLE = (By.CSS_SELECTOR, "div[role='heading']")
 
-    def __init__(self, driver: selenium.webdriver, query: str, ad_visit_time: int) -> None:
+    def __init__(self, driver: selenium.webdriver, query: str, ad_visit_time: int, proxy: str) -> None:
 
         self._driver = driver
         self._ad_visit_time = ad_visit_time
         self._search_query, self._filter_words = self._process_query(query)
+        self._proxy = proxy
 
         self._load()
 
@@ -59,8 +60,9 @@ class SearchController:
 
         self._close_cookie_dialog()
 
-        # search_input_box = self._driver.find_element(*self.SEARCH_INPUT)
-        # search_input_box.send_keys(self._search_query, Keys.ENTER)
+        if self._proxy == "O":
+            search_input_box = self._driver.find_element(*self.SEARCH_INPUT)
+            search_input_box.send_keys(self._search_query, Keys.ENTER)
 
         # sleep after entering search keyword by randomly selected amount
         # between 0.5 and 3 seconds
@@ -126,9 +128,12 @@ class SearchController:
             self._driver.quit()
 
     def _load(self) -> None:
-        """Load Google main page"""
+        """Load main page"""
 
-        self._driver.get(self._search_query)
+        if self._proxy == "O":
+            self._driver.get(self.URL)
+        else:
+            self._driver.get(self._search_query)
 
     def _get_ad_links(self) -> AdList:
         """Extract ad links to click
