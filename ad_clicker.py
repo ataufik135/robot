@@ -27,7 +27,8 @@ def get_arg_parser() -> ArgumentParser:
         dest="ad_visit_time",
         help="Number of seconds to wait on the ad page opened",
     )
-    arg_parser.add_argument("--headless", action="store_true", help="Use headless browser")
+    arg_parser.add_argument(
+        "--headless", action="store_true", help="Use headless browser")
     arg_parser.add_argument(
         "-p",
         "--proxy",
@@ -76,7 +77,8 @@ def main():
 
     driver = create_webdriver(proxy, args.auth, args.headless)
 
-    search_controller = SearchController(driver, args.query, args.ad_visit_time)
+    search_controller = SearchController(
+        driver, args.query, args.ad_visit_time, proxy)
     ads = search_controller.search_for_ads()
 
     if not ads:
