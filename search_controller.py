@@ -104,20 +104,21 @@ class SearchController:
 
             ad_link_element.send_keys(Keys.CONTROL + Keys.RETURN)
 
-            for window_handle in self._driver.window_handles:
-                if window_handle != original_window_handle:
-                    self._driver.switch_to.window(window_handle)
-                    sleep(self._ad_visit_time)
-                    self._driver.close()
-                    break
+            # for window_handle in self._driver.window_handles:
+            #     if window_handle != original_window_handle:
+            #         self._driver.switch_to.window(window_handle)
+            #         sleep(self._ad_visit_time)
+            #         self._driver.close()
+            #         break
 
-            # go back to original window
-            self._driver.switch_to.window(original_window_handle)
-            sleep(1)
+            # # go back to original window
+            # self._driver.switch_to.window(original_window_handle)
+            sleep(2)
 
             # scroll the page to avoid elements remain outside of the view
             self._driver.execute_script(
                 "arguments[0].scrollIntoView(true);", ad_link_element)
+        sleep(5)
 
     def end_search(self) -> None:
         """Close the browsers"""
