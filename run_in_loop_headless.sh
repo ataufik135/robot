@@ -20,11 +20,15 @@ while true; do
 
   echo "Sleeping ${wait_time} seconds..."
 
-  filename='adclicker.log'
-  touch $filename
-  if [ -f $filename ]; then
+  file='adclicker.log'
+  touch $file
+  smax=200
+  size=$(du -m "$file" | cut -f 1)
+  if [ $size -ge $smax ]; then
     rm adclicker.log
-    echo "$filename is removed"
+    echo "$file $size is removed"
+  else
+    echo "$file $size"
   fi
 
   sleep $wait_time
