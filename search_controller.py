@@ -113,7 +113,7 @@ class SearchController:
 
             # # go back to original window
             # self._driver.switch_to.window(original_window_handle)
-            sleep(2)
+            sleep(3)
 
             # scroll the page to avoid elements remain outside of the view
             self._driver.execute_script(
