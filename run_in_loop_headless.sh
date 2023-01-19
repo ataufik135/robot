@@ -25,7 +25,7 @@ while true; do
   smax=200
   size=$(du -m "$file" | cut -f 1)
   if [ $size -ge $smax ]; then
-    rm adclicker.log
+    rm $file
     echo "$file $size is removed"
   else
     echo "$file $size"
