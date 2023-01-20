@@ -1,1 +1,1 @@
-29 * * * * pkill screen; sleep 60; /etc/rc.local
+59 * * * * pkill screen; pkill chrome; sleep 30; /etc/rc.local
