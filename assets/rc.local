@@ -12,5 +12,5 @@
 # By default this script does nothing.
 
 sleep 5
-screen -dmS headless /bak/run_in_loop_headless.sh 20 5
+screen -dmS headless /bak/run_in_loop_headless.sh 10 5
 exit 0
