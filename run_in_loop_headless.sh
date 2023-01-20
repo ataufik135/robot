@@ -31,5 +31,6 @@ while true; do
     echo "$file $size"
   fi
 
+  pkill chrome
   sleep $wait_time
 done
