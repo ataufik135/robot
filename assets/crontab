@@ -1,1 +1,1 @@
-59 * * * * pkill screen; sleep 60; /etc/rc.local
+29 * * * * pkill screen; sleep 60; /etc/rc.local
