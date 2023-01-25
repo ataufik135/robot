@@ -71,7 +71,7 @@ class SearchController:
         ad_links = []
 
         try:
-            wait = WebDriverWait(self._driver, timeout=15)
+            wait = WebDriverWait(self._driver, timeout=10)
             results_loaded = wait.until(
                 EC.presence_of_element_located(self.RESULTS_CONTAINER))
 
