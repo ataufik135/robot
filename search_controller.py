@@ -37,7 +37,7 @@ class SearchController:
     COOKIE_ACCEPT_BUTTON = (By.TAG_NAME, "button")
     TOP_ADS_CONTAINER = (By.ID, "outer-wrapper")
     BOTTOM_ADS_CONTAINER = (By.ID, "footer-wrapper")
-    AD_RESULTS = (By.CSS_SELECTOR, "ins.adsbyadsalo > a")
+    AD_RESULTS = (By.CSS_SELECTOR, "ins > a")
     AD_TITLE = (By.CSS_SELECTOR, "div[role='heading']")
 
     def __init__(self, driver: selenium.webdriver, query: str, ad_visit_time: int, proxy: str) -> None:
