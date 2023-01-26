@@ -28,16 +28,16 @@ USER_AGENTS = [
 ]
 
 PROXIES = [
-    "grjzwrki:md4guryfe6de@185.199.229.156:7492",
-    "grjzwrki:md4guryfe6de@185.199.228.220:7300",
-    "grjzwrki:md4guryfe6de@185.199.231.45:8382",
-    "grjzwrki:md4guryfe6de@188.74.210.207:6286",
-    "grjzwrki:md4guryfe6de@188.74.183.10:8279",
-    "grjzwrki:md4guryfe6de@188.74.210.21:6100",
-    "grjzwrki:md4guryfe6de@45.155.68.129:8133",
-    "grjzwrki:md4guryfe6de@154.95.36.199:6893",
-    "grjzwrki:md4guryfe6de@45.94.47.66:8110",
-    "grjzwrki:md4guryfe6de@144.168.217.88:8780",
+    "ofwcerzn:tz6hcufod5do@185.199.229.156:7492",
+    "ofwcerzn:tz6hcufod5do@185.199.228.220:7300",
+    "ofwcerzn:tz6hcufod5do@185.199.231.45:8382",
+    "ofwcerzn:tz6hcufod5do@188.74.210.207:6286",
+    "ofwcerzn:tz6hcufod5do@188.74.183.10:8279",
+    "ofwcerzn:tz6hcufod5do@188.74.210.21:6100",
+    "ofwcerzn:tz6hcufod5do@45.155.68.129:8133",
+    "ofwcerzn:tz6hcufod5do@154.95.36.199:6893",
+    "ofwcerzn:tz6hcufod5do@45.94.47.66:8110",
+    "ofwcerzn:tz6hcufod5do@144.168.217.88:8780",
 ]
 
 URL_ADS = [
