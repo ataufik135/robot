@@ -28,7 +28,7 @@ USER_AGENTS = [
 ]
 
 PROXIES = [
-    "L"
+    "L",
     "157.245.247.84:59166",
     "164.163.32.3:59166",
     "128.199.212.124:59166",
@@ -269,8 +269,6 @@ PROXIES = [
     "173.255.216.8:59166",
     "51.222.146.133:59166",
     "206.189.118.100:59166",
-
-
 ]
 
 URL_ADS = [
@@ -355,10 +353,18 @@ def main():
         try:
             r = getImpress(url, user_agent, proxy)
             r_p = getImpress(url_p, user_agent, proxy).text
-            msg_ad += f"{r_p} || "
+            msg_ad += f"{r_p} | "
             msg_ad += f"{url_ad[2]}"
         except:
-            msg_ad += f"death - {proxy}"
+            msg_ad += f"{proxy}"
+            proxy = 'L'
+            try:
+                r = getImpress(url, user_agent, proxy)
+                r_p = getImpress(url_p, user_agent, proxy).text
+                msg_ad += f" > {r_p} | "
+                msg_ad += f"{url_ad[2]}"
+            except:
+                msg_ad += f" | {proxy}"
 
         try:
             if (r.status_code == 200):
