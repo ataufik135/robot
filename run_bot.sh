@@ -13,5 +13,6 @@ if [[ $p ]] && [[ $t ]]; then
   echo "Running with ${t} thread | proxy ${p}"
   python3.9 bot.py -p ${p} -t ${t}
 else
+  echo "Running with 1 thread | proxy L"
   python3.9 bot.py -p L -t 1
 fi
