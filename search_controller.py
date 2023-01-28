@@ -1,532 +1,254 @@
-import json
-import time
-import requests
 import random
-import threading
-from argparse import ArgumentParser
+from time import sleep
+
+import selenium
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import (
+    TimeoutException,
+    NoSuchElementException,
+    ElementNotInteractableException,
+)
+
+from config import logger
 
 
-USER_AGENTS = [
-    "Mozilla/5.0 (Linux; Android 12; SM-S906N Build/QP1A.190711.020; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/80.0.3987.119 Mobile Safari/537.36",
-    "Mozilla/5.0 (Linux; Android 10; SM-G996U Build/QP1A.190711.020; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Mobile Safari/537.36",
-    "Mozilla/5.0 (Linux; Android 10; SM-G980F Build/QP1A.190711.020; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/78.0.3904.96 Mobile Safari/537.36",
-    "Mozilla/5.0 (Linux; Android 12; Pixel 6 Build/SD1A.210817.023; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/94.0.4606.71 Mobile Safari/537.36",
-    "Mozilla/5.0 (Linux; Android 11; Pixel 5 Build/RQ3A.210805.001.A1; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/92.0.4515.159 Mobile Safari/537.36",
-    "Mozilla/5.0 (Linux; Android 10; Google Pixel 4 Build/QD1A.190821.014.C2; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/78.0.3904.108 Mobile Safari/537.36",
-    "Mozilla/5.0 (Linux; Android 9; J8110 Build/55.0.A.0.552; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/71.0.3578.99 Mobile Safari/537.36",
-    "Mozilla/5.0 (Linux; Android 10; HTC Desire 21 pro 5G) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.127 Mobile Safari/537.36",
-    "Mozilla/5.0 (Linux; Android 10; Wildfire U20 5G) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.136 Mobile Safari/537.36",
-    "Mozilla/5.0 (iPhone14,6; U; CPU iPhone OS 15_4 like Mac OS X) AppleWebKit/602.1.50 (KHTML, like Gecko) Version/10.0 Mobile/19E241 Safari/602.1",
-    "Mozilla/5.0 (iPhone14,3; U; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/602.1.50 (KHTML, like Gecko) Version/10.0 Mobile/19A346 Safari/602.1",
-    "Mozilla/5.0 (iPhone13,2; U; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/602.1.50 (KHTML, like Gecko) Version/10.0 Mobile/15E148 Safari/602.1",
-    "Mozilla/5.0 (iPhone12,1; U; CPU iPhone OS 13_0 like Mac OS X) AppleWebKit/602.1.50 (KHTML, like Gecko) Version/10.0 Mobile/15E148 Safari/602.1",
-    "Mozilla/5.0 (iPhone; CPU iPhone OS 12_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/12.0 Mobile/15E148 Safari/604.1",
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36 Edge/12.246",
-    "Mozilla/5.0 (X11; CrOS x86_64 8172.45.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.64 Safari/537.36",
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) AppleWebKit/601.3.9 (KHTML, like Gecko) Version/9.0.2 Safari/601.3.9",
-    "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:15.0) Gecko/20100101 Firefox/15.0.1",
-]
-
-PROXIES = [
-    "51.68.125.26:59166",
-    "152.228.171.118:59166",
-    "206.189.112.62:59166",
-    "161.35.40.69:59166",
-    "5.189.179.173:59166",
-    "194.163.160.116:59166",
-    "51.255.95.41:59166",
-    "95.111.239.124:59166",
-    "34.86.75.53:53389",
-    "51.158.124.186:59166",
-    "167.172.178.242:59166",
-    "165.227.153.96:59166",
-    "51.83.131.38:59166",
-    "78.47.227.99:59166",
-    "51.91.248.255:59166",
-    "172.104.158.151:59166",
-    "194.163.182.132:59166",
-    "51.210.182.122:59166",
-    "82.115.19.177:2237",
-    "178.62.117.246:59166",
-    "144.91.120.165:7497",
-    "207.180.213.101:59166",
-    "178.62.253.154:59166",
-    "75.119.159.58:59166",
-    "128.199.55.164:4430",
-    "176.31.182.123:59166",
-    "51.255.46.210:59166",
-    "51.68.50.41:59166",
-    "85.214.195.84:59166",
-    "151.80.29.232:59166",
-    "194.163.189.206:59166",
-    "68.183.219.54:59166",
-    "178.62.100.151:59166",
-    "51.75.64.91:59166",
-    "5.181.252.102:59166",
-    "51.77.192.111:59166",
-    "46.105.124.74:59166",
-    "51.195.116.88:1234",
-    "206.189.117.108:59166",
-    "157.230.19.132:59166",
-    "174.138.4.227:59166",
-    "45.91.93.166:15280",
-    "138.68.124.120:59166",
-    "75.119.157.170:59166",
-    "174.138.6.8:59166",
-    "206.189.118.100:59166",
-    "159.69.117.155:42572",
-    "146.59.152.52:59166",
-    "185.75.37.61:59166",
-    "51.83.78.141:59166",
-    "178.62.144.84:59166",
-    "95.213.228.10:59166",
-    "167.99.214.171:59166",
-    "37.59.66.181:55529",
-    "46.101.37.189:59166",
-    "141.95.103.206:1234",
-    "138.197.186.172:59166",
-    "93.88.227.48:59166",
-    "51.178.82.49:59166",
-    "51.68.74.150:59166",
-    "37.187.88.116:59166",
-    "165.22.64.134:59166",
-    "87.98.158.205:59166",
-    "37.59.56.111:59166",
-    "188.120.248.106:59166",
-    "51.255.219.244:59166",
-    "79.137.204.113:1080",
-    "51.178.51.28:59166",
-    "167.172.102.125:59166",
-    "178.62.202.227:59166",
-    "194.163.163.245:59166",
-    "207.154.240.108:59166",
-    "104.248.167.16:59166",
-    "37.59.66.181:55652",
-    "212.8.244.5:10081",
-    "185.180.223.240:50997",
-    "45.91.93.166:10539",
-    "37.59.66.181:56883",
-    "37.18.73.94:5566",
-    "37.59.66.181:56321",
-    "5.189.159.215:59166",
-    "37.59.66.181:56420",
-    "188.93.213.242:1080",
-    "37.120.162.180:35617",
-    "68.183.25.31:59166",
-    "5.130.185.31:10801",
-    "31.43.203.100:1080",
-    "46.241.57.29:1080",
-    "142.93.250.71:59166",
-    "174.138.33.62:59166",
-    "68.183.20.254:59166",
-    "107.170.18.230:59166",
-    "172.104.20.199:59166",
-    "138.197.11.186:59166",
-    "172.104.210.40:59166",
-    "162.243.246.60:59166",
-    "159.65.245.126:59166",
-    "159.65.220.89:59166",
-    "67.207.89.36:59166",
-    "159.89.90.162:59166",
-    "138.197.13.93:59166",
-    "198.74.58.55:59166",
-    "165.227.79.99:59166",
-    "64.225.6.88:59166",
-    "157.245.247.84:59166",
-    "107.170.81.141:59166",
-    "192.241.149.84:17999",
-    "157.245.214.241:59166",
-    "157.245.223.201:59166",
-    "157.230.8.196:59166",
-    "158.69.225.110:59166",
-    "165.227.187.48:59166",
-    "158.69.60.179:59166",
-    "51.222.146.133:59166",
-    "159.89.49.172:59166",
-    "159.89.34.109:59166",
-    "194.110.55.74:1080",
-    "142.44.241.192:59166",
-    "216.55.243.170:8111",
-    "185.54.178.193:1080",
-    "159.203.13.82:59166",
-    "98.142.110.251:59166",
-    "160.119.127.43:59166",
-    "104.237.134.201:59166",
-    "96.126.113.216:59166",
-    "184.168.122.103:7890",
-    "192.111.137.37:18762",
-    "47.88.29.57:9664",
-    "199.229.254.129:4145",
-    "192.252.215.5:16137",
-    "192.111.139.163:19404",
-    "192.252.214.20:15864",
-    "159.89.163.128:59166",
-    "192.252.209.155:14455",
-    "198.8.94.174:39078",
-    "192.111.137.34:18765",
-    "192.111.135.17:18302",
-    "192.111.129.145:16894",
-    "192.252.208.67:14287",
-    "37.59.66.181:56315",
-    "167.99.168.124:59166",
-    "66.42.224.229:41679",
-    "173.255.216.8:59166",
-    "192.252.220.92:17328",
-    "67.201.33.10:25283",
-    "138.197.203.84:59166",
-    "167.172.119.162:59166",
-    "178.128.177.166:59166",
-    "72.221.164.34:60671",
-    "138.68.245.25:59166",
-    "65.169.38.73:26592",
-    "51.79.251.116:59166",
-    "68.71.249.153:48606",
-    "69.61.200.104:36181",
-    "208.102.51.6:58208",
-    "128.199.143.141:59166",
-    "134.209.99.92:59166",
-    "72.206.181.123:4145",
-    "188.166.208.222:59166",
-    "206.189.85.92:59166",
-    "172.104.173.122:59166",
-    "198.44.166.253:1080",
-    "128.199.228.54:59166",
-    "206.189.157.253:59166",
-    "172.105.119.124:1080",
-    "165.22.52.169:17171",
-    "139.59.193.106:59166",
-    "164.90.152.213:59166",
-    "165.22.243.18:59166",
-    "128.199.79.8:59166",
-    "128.199.128.10:59166",
-    "202.29.229.34:59166",
-    "128.199.120.36:59166",
-    "72.206.181.105:64935",
-    "128.199.212.124:59166",
-    "68.183.178.172:62861",
-    "72.195.34.35:27360",
-    "116.118.50.231:59166",
-    "72.210.252.134:46164",
-    "70.166.167.38:57728",
-    "178.128.212.72:59166",
-    "165.22.245.15:59166",
-    "157.230.39.148:59166",
-    "138.219.244.114:59166",
-    "157.230.37.135:59166",
-    "47.242.87.234:9527",
-    "159.192.131.68:59166",
-    "200.55.247.3:59166",
-    "178.128.117.95:59166",
-    "103.196.136.158:59166",
-    "163.47.214.157:59166",
-    "47.240.226.173:1080",
-    "47.243.95.228:10080",
-    "45.118.144.113:59166",
-    "200.35.157.156:59166",
-    "118.171.168.165:50862",
-    "176.114.134.106:1080",
-    "168.196.160.61:59166",
-    "168.196.160.62:59166",
-    "189.85.112.20:59166",
-    "45.169.70.9:59166",
-    "103.149.53.120:59166",
-    "37.59.66.181:56588",
-    "37.120.162.180:34643",
-    "176.88.177.197:61080",
-    "118.27.0.171:59166",
-    "45.91.93.166:36181",
-    "170.210.156.33:59166",
-    "59.9.158.33:1080",
-    "202.180.78.12:59166",
-    "159.89.228.253:38172",
-    "192.252.211.197:14921",
-    "202.180.78.8:59166",
-    "192.111.135.18:18301",
-    "192.252.208.70:14282",
-    "134.209.44.126:1418",
-    "45.158.230.159:24115",
-    "98.162.25.4:31654",
-    "72.195.34.60:27391",
-    "185.203.7.108:1080",
-    "184.178.172.18:15280",
-    "184.181.217.194:4145",
-    "98.162.96.53:10663",
-    "98.178.72.21:10919",
-    "184.178.172.25:15291",
-    "184.178.172.14:4145",
-    "72.221.196.157:35904",
-    "184.178.172.5:15303",
-    "184.178.172.28:15294",
-    "98.162.25.29:31679",
-    "149.202.69.31:1080",
-    "43.245.94.229:4996",
-    "103.239.52.191:33427",
-    "125.143.142.204:1080",
-    "174.77.111.198:49547",
-    "184.181.217.206:4145",
-    "138.197.185.192:59166",
-    "45.158.230.159:24113",
-    "86.102.226.131:1080",
-    "152.67.66.37:1080",
-    "37.59.66.181:55034",
-    "45.158.230.159:24116",
-    "86.201.57.102:1080",
-    "45.158.230.159:24100",
-    "129.146.242.19:2049",
-    "1.84.219.68:1081",
-    "31.131.16.143:59166",
-    "45.158.230.159:24109",
-    "37.59.66.181:55108",
-    "203.144.189.111:10000",
-    "88.99.150.200:35908",
-    "185.6.10.41:53679",
-    "203.144.189.121:10000",
-    "37.59.66.181:55258",
-    "51.75.126.150:43298",
-    "52.57.197.196:26007",
-    "132.148.128.88:6167",
-    "37.59.66.181:55469",
-    "94.130.182.121:5566",
-    "88.198.165.115:63494",
-    "51.222.29.254:33822",
-    "203.144.189.115:10000",
-    "203.144.189.116:10000",
-    "203.144.189.113:10000",
-    "37.59.66.181:55653",
-    "74.91.30.35:33633",
-    "37.59.66.181:56945",
-    "45.91.93.166:32100",
-    "178.217.215.49:1080",
-    "178.128.221.243:14111",
-    "46.43.93.74:1080",
-    "179.48.245.41:1080",
-    "5.133.192.92:32673",
-    "128.199.163.44:37136",
-    "150.129.151.42:6667",
-    "37.187.153.227:54988",
-    "203.144.189.117:10000",
-    "213.32.69.19:17547",
-    "27.14.116.219:1080",
-    "212.152.35.114:1080",
-    "192.169.205.131:14592",
-    "97.74.6.64:14769",
-    "173.236.170.45:35279",
-    "208.113.185.57:5939",
-    "74.91.29.53:33633",
-    "192.241.249.237:61819",
-    "37.59.66.181:56826",
-    "78.135.83.108:1080",
-    "91.107.130.31:1080",
-    "134.209.44.126:47522",
-    "157.245.148.76:1080",
-    "142.93.6.130:54824",
-    "74.91.29.51:33633",
-    "167.71.205.1:64899",
-    "223.166.93.91:10811",
-    "103.142.26.185:50025",
-    "45.119.83.197:16187",
-    "205.185.117.77:16831",
-    "37.59.66.181:56970",
-    "203.144.189.114:10000",
-    "146.59.178.223:35222",
-    "167.99.15.50:13586",
-    "164.163.32.3:59166",
-    "37.59.66.181:56430",
-    "123.120.49.151:64707",
-    "67.210.146.50:11080",
-    "146.59.178.221:35222",
-    "103.207.8.130:23804",
-    "5.133.220.159:12343",
-    "192.241.149.88:4524",
-    "95.217.211.68:17537",
-    "125.227.225.157:3389",
-    "18.166.116.121:8090",
-    "192.169.205.131:62933",
-    "192.169.205.131:42704",
-    "54.38.94.71:27808",
-    "167.99.15.50:43371",
-    "159.65.225.8:26945",
-    "198.199.76.62:48127",
-    "157.245.1.59:30030",
-    "208.113.184.21:5939",
-    "37.59.66.181:55381",
-    "37.59.66.181:55518",
-    "37.59.66.181:55596",
-    "138.199.25.13:3907",
-    "157.230.243.173:4714",
-    "166.62.52.25:47073",
-    "143.198.203.147:1080",
-    "69.163.160.197:47934",
-    "178.128.221.243:54105",
-    "46.101.230.156:64333",
-    "132.148.129.254:6167",
-    "37.59.66.181:56094",
-    "45.63.64.40:45826",
-    "5.189.129.186:46522",
-    "178.128.221.243:6136",
-    "103.142.26.185:58574",
-    "159.65.225.8:13644",
-    "165.22.38.149:27633",
-    "206.189.31.242:63214",
-    "45.55.32.201:47144",
-    "74.91.30.38:33633",
-    "86.102.177.183:1080",
-    "67.205.174.75:29478",
-    "46.105.105.223:9066",
-    "95.217.226.237:36612",
-    "37.59.66.181:55801",
-    "50.63.13.3:36590",
-    "103.75.184.179:62153",
-    "213.149.103.132:58177",
-    "51.222.13.193:10084",
-    "37.59.66.181:55071",
-    "103.152.254.160:10080",
-    "103.16.199.166:59166",
-    "103.169.7.87:61524",
-    "103.70.79.28:59166",
-    "103.43.45.20:59166",
-    "222.124.177.148:59166",
-    "27.191.60.236:1080",
-    "58.49.230.248:30001",
-    "119.82.226.232:59166",
-    "202.149.89.67:7999",
-    "218.64.255.198:7302",
-    "27.191.60.178:1080",
-    "103.242.107.227:6081",
-    "123.171.42.88:1080",
-    "36.94.122.18:59166",
-    "27.191.60.101:1080",
-    "210.210.172.78:10000",
-    "106.52.104.55:59166",
-    "60.165.35.64:7302",
-    "37.59.66.181:56017",
-
-]
-
-URL_ADS = [
-    ['ca-pub-udmnpq-00000000008', 'y4da1k7c1k', 'sidebar1'],
-    ['ca-pub-gojwcs-00000000009', '7xxm991zmc', 'post'],
-    ['ca-pub-byosny-00000000052', '1w41ct9ugr', 'sidebar2'],
-    ['ca-pub-ehbqgq-00000000053', 'vtf6zy5j3n', 'header'],
-    ['ca-pub-sepngh-00000000054', '1q5236304i', 'home'],
-    ['ca-pub-vdcolm-00000000065', 'u4w8be84r5', 'footer1'],
-    ['ca-pub-jlgdyn-00000000068', 'jf27ky091w', 'footer2'],
-    ['ca-pub-wiljai-00000000069', '8p4l78dirp', 'footer3'],
-    ['ca-pub-vdkezq-00000000070', 'cxw43u0366', 'sidebar3'],
-    ['ca-pub-ijtjbf-00000000071', '8a7562x81p', 'sidebar4'],
-    ['ca-pub-hbvjqf-00000000157', '7z9l743467', 'sidebar5'],
-    ['ca-pub-dsqnab-00000000158', '75fy1icfw7', 'sidebar6'],
-    ['ca-pub-dsqnab-00000000158', '75fy1icfw7', 'sidebar6'],
-    ['ca-pub-qmhidd-00000000159', '89wo4zx90y', 'sidebar7'],
-    ['ca-pub-bqipqu-00000000160', '0793ce03tr', 'sidebar8'],
-    ['ca-pub-mjyqkg-00000000161', 'qn3jm12kj8', 'home1'],
-]
+AdList = list[tuple[selenium.webdriver.remote.webelement.WebElement, str, str]]
 
 
-def get_arg_parser() -> ArgumentParser:
-    arg_parser = ArgumentParser()
-    arg_parser.add_argument("-t", "--thread", default=4,
-                            type=int, help="Threads")
-    arg_parser.add_argument(
-        "-p",
-        "--proxy",
-        help="ip:port or username:password@host:port",
-    )
-    return arg_parser
+class SearchController:
+    """Search controller for ad clicker
 
+    :type driver: selenium.webdriver
+    :param driver: Selenium Chrome webdriver instance
+    :type query: str
+    :param query: Search query
+    :type ad_visit_time: int
+    :param ad_visit_time: Number of seconds to wait on the ad page
+    """
 
-def get_random_user_agent() -> str:
-    user_agent = random.choice(USER_AGENTS)
-    return user_agent
+    URL = "https://www.croxyproxy.com"
 
+    SEARCH_INPUT = (By.NAME, "url")
+    RESULTS_CONTAINER = (By.ID, "pages-wrap")
+    COOKIE_DIALOG = (By.CSS_SELECTOR, "div[role='dialog']")
+    COOKIE_ACCEPT_BUTTON = (By.TAG_NAME, "button")
+    TOP_ADS_CONTAINER = (By.ID, "outer-wrapper")
+    BOTTOM_ADS_CONTAINER = (By.ID, "footer-wrapper")
+    AD_RESULTS = (By.CSS_SELECTOR, "ins > a")
+    AD_TITLE = (By.CSS_SELECTOR, "div[role='heading']")
 
-def get_random_proxy() -> str:
-    proxy = random.choice(PROXIES)
-    return proxy
+    def __init__(self, driver: selenium.webdriver, query: str, ad_visit_time: int, proxy: str) -> None:
 
+        self._driver = driver
+        self._ad_visit_time = 1
+        self._search_query, self._filter_words = self._process_query(query)
+        self._proxy = proxy
 
-def get_random_url_ad() -> str:
-    url_ad = random.choice(URL_ADS)
-    return url_ad
+        self._load()
 
+    def search_for_ads(self):
+        """Start search for the given query and return ads if any
 
-def getImpress(url, user_agent, proxy):
-    if proxy != 'L':
-        proxies = {
-            "http": "socks5://"+proxy+"/",
-            "https": "socks5://"+proxy+"/"
-        }
-    else:
-        proxies = False
+        :rtype: list
+        :returns: List of (ad, ad_link, ad_title) tuples
+        """
 
-    r = requests.get(url, allow_redirects=True, timeout=30, headers={
-                     'User-Agent': user_agent}, proxies=proxies)
-    return r
+        logger.info(f"Starting search for '{self._search_query}'")
 
+        self._close_cookie_dialog()
 
-def main():
-    arg_parser = get_arg_parser()
-    args = arg_parser.parse_args()
+        if self._proxy == "O":
+            search_input_box = self._driver.find_element(*self.SEARCH_INPUT)
+            search_input_box.send_keys(self._search_query, Keys.ENTER)
 
-    while True:
-        user_agent = get_random_user_agent()
-        if args.proxy == 'O':
-            proxy = get_random_proxy()
+        # sleep after entering search keyword by randomly selected amount
+        # between 0.5 and 3 seconds
+        sleep(random.choice([0.5, 3, 1, 1.5, 2, 2.5]))
+
+        ad_links = []
+
+        try:
+            wait = WebDriverWait(self._driver, timeout=10)
+            results_loaded = wait.until(
+                EC.presence_of_element_located(self.RESULTS_CONTAINER))
+
+            if results_loaded:
+                logger.info("Getting ad links...")
+                ad_links = self._get_ad_links()
+
+        except TimeoutException:
+            logger.error("Timed out waiting for results!")
+            self.end_search()
+
+        return ad_links
+
+    def click_ads(self, ads: AdList) -> None:
+        """Click ads found
+
+        :type ads: AdList
+        :param ads: List of (ad, ad_link, ad_title) tuples
+        """
+
+        # store the ID of the original window
+        original_window_handle = self._driver.current_window_handle
+
+        for ad in ads:
+            ad_link_element = ad[0]
+            ad_link = ad[1]
+            logger.info(f"Clicking to ({ad_link})...")
+
+            # open link in a different tab
+
+            ad_link_element.send_keys(Keys.CONTROL + Keys.RETURN)
+
+            # for window_handle in self._driver.window_handles:
+            #     if window_handle != original_window_handle:
+            #         self._driver.switch_to.window(window_handle)
+            #         sleep(self._ad_visit_time)
+            #         self._driver.close()
+            #         break
+
+            # # go back to original window
+            # self._driver.switch_to.window(original_window_handle)
+            sleep(2)
+
+            # scroll the page to avoid elements remain outside of the view
+            self._driver.execute_script(
+                "arguments[0].scrollIntoView(true);", ad_link_element)
+        sleep(5)
+
+    def end_search(self) -> None:
+        """Close the browsers"""
+
+        if self._driver:
+            # delete all cookies before quitting
+            self._driver.delete_all_cookies()
+            self._driver.quit()
+
+    def _load(self) -> None:
+        """Load main page"""
+
+        if self._proxy == "O":
+            self._driver.get(self.URL)
         else:
-            proxy = 'L'
+            self._driver.get(self._search_query)
 
-        url_ad = get_random_url_ad()
-        url = f"https://apis.adsalo.com/v2/ca/ads?client={url_ad[0]}&slot={url_ad[1]}&ref=allinsaja.blogspot.com"
-        url_p = "https://ipv4.webshare.io"
+    def _get_ad_links(self) -> AdList:
+        """Extract ad links to click
 
-        msg_ad = ""
-        msg_o = f"{'O' if proxy != 'L' else 'L'} | "
+        :rtype: AdList
+        :returns: List of (ad, ad_link, ad_title) tuples
+        """
 
-        try:
-            r = getImpress(url, user_agent, proxy)
-            r_p = getImpress(url_p, user_agent, proxy).text
-            msg_ad += f"{r_p} || "
-            msg_ad += f"{url_ad[2]}"
-        except:
-            msg_ad += f"death - {proxy}"
+        ads = []
 
-        try:
-            if (r.status_code == 200):
-                data = r.text
-                if data != '':
-                    jsonD = json.loads(data)
-                else:
-                    jsonD = False
-            else:
-                jsonD = False
-        except:
-            jsonD = False
-
-        resp = jsonD
-
-        if resp != False:
-            urlAd = f"https://apis.adsalo.com/v2/ca/ads?client={url_ad[0]}&site={resp['data']['siteUrl']}"
-
+        while not self._is_scroll_at_the_end():
             try:
-                click = getImpress(urlAd, user_agent, proxy).status_code
-                msg_o += f"Success {click} | {msg_ad}"
-            except:
-                msg_o += f"Failed | {msg_ad}"
+                top_ads_containers = self._driver.find_elements(
+                    *self.TOP_ADS_CONTAINER)
+                for ad_container in top_ads_containers:
+                    ads.extend(ad_container.find_elements(*self.AD_RESULTS))
+
+            except NoSuchElementException:
+                logger.debug("Could not found top ads!")
+
+            # try:
+            #     bottom_ads_containers = self._driver.find_elements(
+            #         *self.BOTTOM_ADS_CONTAINER)
+            #     for ad_container in bottom_ads_containers:
+            #         ads.extend(ad_container.find_elements(*self.AD_RESULTS))
+
+            # except NoSuchElementException:
+            #     logger.debug("Could not found bottom ads!")
+
+            self._driver.find_element(
+                By.TAG_NAME, "body").send_keys(Keys.PAGE_DOWN)
+            sleep(1)
+
+        if not ads:
+            return []
+
+        # clean non-ad links and duplicates
+        ads = set([ad_link for ad_link in ads if ad_link.get_attribute("href")])
+
+        # if there are filter words given, filter results accordingly
+        filtered_ads = []
+
+        if self._filter_words:
+
+            for ad in ads:
+
+                for word in self._filter_words:
+                    if word in ad.get_attribute("href"):
+                        filtered_ads.append(ad)
         else:
-            msg_o += f"Failed to impress | {msg_ad}"
+            filtered_ads = ads
 
-        print(msg_o)
-        time.sleep(2)
+        ad_links = []
 
+        for ad in filtered_ads:
+            logger.info("======= Found an Ad =======")
 
-if __name__ == '__main__':
-    arg_parser = get_arg_parser()
-    args = arg_parser.parse_args()
+            ad_link = ad.get_attribute("href")
+            logger.debug(f"Ad link: {ad_link}")
 
-    threads = []
-    for th in range(args.thread):
-        t = threading.Thread(target=main)
-        threads.append(t)
-        t.start()
-    for thh in threads:
-        thh.join()
+            ad_links.append((ad, ad_link))
+
+        return ad_links
+
+    def _close_cookie_dialog(self) -> None:
+        """If cookie dialog is opened, close it by accepting"""
+
+        try:
+            cookie_dialog = self._driver.find_element(*self.COOKIE_DIALOG)
+            accept_button = cookie_dialog.find_elements(
+                *self.COOKIE_ACCEPT_BUTTON)[-2]
+            accept_button.click()
+            sleep(1)
+
+        except (NoSuchElementException, ElementNotInteractableException, IndexError):
+            pass
+
+    def _is_scroll_at_the_end(self) -> bool:
+        """Check if scroll is at the end
+
+        :rtype: bool
+        :returns: Whether the scrollbar was reached to end or not
+        """
+
+        page_height = self._driver.execute_script(
+            "return document.body.scrollHeight;")
+        total_scrolled_height = self._driver.execute_script(
+            "return window.pageYOffset + window.innerHeight;"
+        )
+
+        return page_height - 1 <= total_scrolled_height
+
+    @staticmethod
+    def _process_query(query: str) -> tuple[str, list[str]]:
+        """Extract search query and filter words from the query input
+
+        Query and filter words are splitted with "@" character. Multiple
+        filter words can be used by separating with "#" character.
+
+        e.g. wireless keyboard@amazon#ebay
+             bluetooth headphones @ sony # amazon  #bose
+
+        :type query: str
+        :param query: Query string with optional filter words
+        :rtype tuple
+        :returns: Search query and list of filter words if any
+        """
+
+        search_query = query.split("@")[0].strip()
+
+        filter_words = []
+
+        if "@" in query:
+            filter_words = [word.strip().lower()
+                            for word in query.split("@")[1].split("#")]
+
+        return (search_query, filter_words)
