@@ -356,7 +356,6 @@ def main():
             msg_ad += f"{r_p} | "
             msg_ad += f"{url_ad[2]}"
         except:
-            msg_ad += f"{proxy}"
             proxy = 'L'
             try:
                 r = getImpress(url, user_agent, proxy)
