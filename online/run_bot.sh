@@ -3,19 +3,19 @@ cd /bak
 source /bak/env/bin/activate
 
 if [[ $# -eq 1 ]]; then
-  th=$1
+  t=$1
 elif [[ $# -eq 2 ]]; then
-  th=$1
-  i=$2
+  t=$1
+  t1=$2
 elif [[ $# -eq 3 ]]; then
-  th=$1
-  i=$2
-  t=$3
+  t=$1
+  t1=$2
+  t2=$3
 fi
 
-if [[ $th ]] && [[ $i ]] && [[ $t ]]; then
-  echo "Running with ${th} thread"
-  python3.9 bot.py -th ${th} -i ${i} -t ${t}
+if [[ $t ]] && [[ $t1 ]] && [[ $t2 ]]; then
+  echo "Running with ${t} thread"
+  python3.9 bot.py -t ${t} -t1 ${t1} -t2 ${t2}
 else
   echo "Running with default config"
   python3.9 bot.py
