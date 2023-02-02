@@ -1,3 +1,4 @@
+L
 socks5://nblvvywv:ft96alx9sv80@185.199.229.156:7492
 socks5://nblvvywv:ft96alx9sv80@185.199.228.220:7300
 socks5://nblvvywv:ft96alx9sv80@185.199.231.45:8382
