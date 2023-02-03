@@ -13,4 +13,5 @@
 
 sleep 5
 screen -dmS headless /bak/run_in_loop_headless.sh 5 5
+run_bot.sh 10 10 30
 exit 0
